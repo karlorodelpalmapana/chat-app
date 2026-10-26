@@ -165,7 +165,7 @@ function showMessage(msg) {
   item.className = isMine ? "message mine" : "message";
 
 
-  if (msg.content === "⚠️ This message was unsent.") {
+  if (msg.content === "This message was unsent.") {
     item.classList.add("is-unsent");
 
     const text = document.createElement("p");
