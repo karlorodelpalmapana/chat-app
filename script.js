@@ -1,5 +1,4 @@
-// ---------  Connect to the database (Supabase) ---------
-// Copy these two values from your Supabase project (Connect button).
+
 const SUPABASE_URL = "https://pkiqkpwvwtzayddyztdy.supabase.co";
 const SUPABASE_KEY = "sb_publishable_SgKVMry4vQAtmERxwJFk2g_anC-FH5S";
 const GEO_URL = "https://geocoding-api.open-meteo.com/v1/search";
@@ -8,7 +7,6 @@ const WEATHER_URL = "https://api.open-meteo.com/v1/forecast";
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 
-// ---------  Grab the elements we need ---------
 const authScreen = document.getElementById("auth-screen");
 const chatScreen = document.getElementById("chat-screen");
 const authForm = document.getElementById("auth-form");
@@ -24,13 +22,12 @@ const messageForm = document.getElementById("message-form");
 const messageInput = document.getElementById("message-input");
 
 
-// ---------  What the app remembers while it runs ---------
 let currentUser = null; // the logged-in user, or null
 const names = {}; // user id -> display name
 let channel = null; // the realtime connection (used in Part 4)
 
 
-// ---------  Sign up, log in, log out ---------
+
 async function signUp() {
   const name = displayName.value.trim();
   if (name.length < 2) {
@@ -89,7 +86,6 @@ sb.auth.onAuthStateChange((event, session) => {
 });
 
 
-// ---------  Start and stop the chat room ---------
 async function startChat(user) {
   currentUser = user;
   authScreen.hidden = true;
@@ -116,7 +112,7 @@ function stopChat() {
   authScreen.hidden = false;
 }
 
-// ---------  Send a message to the database (INSERT) ---------
+
 messageForm.addEventListener("submit", async (event) => {
   event.preventDefault(); // Stop the page from reloading
 
@@ -125,13 +121,13 @@ messageForm.addEventListener("submit", async (event) => {
 
   messageInput.value = "";
 
-  // Commands such as /weather stay on your screen. They are not saved.
+
   if (content.startsWith("/")) {
     handleCommand(content);
     return;
   }
 
-  // We send ONLY the text. The database fills in who sent it.
+ 
   const { data, error } = await sb
     .from("messages")
     .insert({ content: content })
@@ -149,7 +145,7 @@ messageForm.addEventListener("submit", async (event) => {
 });
 
 
-// ---------  Show one message on the screen ---------
+
 function showMessage(msg) {
   // Find if this message bubble already exists on the screen layout grid
   let item = messageList.querySelector('[data-id="' + msg.id + '"]');
@@ -161,14 +157,14 @@ function showMessage(msg) {
     item.dataset.id = msg.id;
     messageList.appendChild(item);
   } else {
-    // Clear out its old elements if we are modifying an existing item
+
     item.innerHTML = "";
   }
 
-  // Set up the message bubble's base style classification classes
+
   item.className = isMine ? "message mine" : "message";
 
-  // 👉 CHECK: Is this message marked as unsent?
+
   if (msg.content === "⚠️ This message was unsent.") {
     item.classList.add("is-unsent");
 
@@ -192,7 +188,7 @@ function showMessage(msg) {
 
     item.append(author, text, time);
 
-    // If it belongs to you, attach the interactive unsend control hook button
+
     if (isMine) {
       const unsendBtn = document.createElement("button");
       unsendBtn.className = "unsend-btn";
@@ -201,7 +197,7 @@ function showMessage(msg) {
 
       unsendBtn.addEventListener("click", async () => {
         if (confirm("Unsend this message? This updates it for everyone.")) {
-          // UPDATE the record row content to your placeholder string flag text
+    
           const { error } = await sb
             .from("messages")
             .update({ content: "⚠️ This message was unsent." })
@@ -218,7 +214,6 @@ function showMessage(msg) {
 }
 
 
-// ---------  Read data from the database (SELECT) ---------
 async function loadNames() {
   const { data, error } = await sb
     .from("profiles")
@@ -244,7 +239,6 @@ async function loadMessages() {
   data.reverse().forEach(showMessage);
 }
 
-// --------- 11. API: a private weather bot (GET) ---------
 
 function describeWeather(code) {
   if (code === 0) return "clear sky";
@@ -259,7 +253,7 @@ function describeWeather(code) {
 }
 
 async function getWeather(city) {
-  // Request 1: turn the city name into latitude and longitude
+
   const geoUrl = GEO_URL + "?name=" + encodeURIComponent(city) + "&count=1";
   const geoResponse = await fetch(geoUrl);
   if (!geoResponse.ok) throw new Error("Geocoding failed");
@@ -269,10 +263,9 @@ async function getWeather(city) {
     return "Sorry, I could not find a city named " + city + ".";
   }
   
-  // 👉 Grab the first matching city object from the array
+
   const place = geoData.results[0];
 
-  // Request 2: ask for the current weather at those coordinates
   const weatherUrl =
     WEATHER_URL +
     "?latitude=" + place.latitude +
@@ -294,7 +287,7 @@ async function getWeather(city) {
 async function handleCommand(text) {
   const words = text.split(" ");
 
-  // 👉 Target the first item in the words array
+
   if (words[0].toLowerCase() !== "/weather") {
     showBotMessage("Unknown command. Try: /weather Manila");
     return;
@@ -316,7 +309,7 @@ async function handleCommand(text) {
 
 function showBotMessage(text) {
   const item = document.createElement("li");
-  item.className = "message bot"; // Pairs up with your yellow CSS styling
+  item.className = "message bot"; 
 
   const author = document.createElement("span");
   author.className = "author";
@@ -330,7 +323,6 @@ function showBotMessage(text) {
   messageList.scrollTop = messageList.scrollHeight;
 }
 
-// ---------  Get new messages instantly (Realtime) ---------
 async function nameFor(userId) {
   if (!names[userId]) {
     const { data } = await sb
