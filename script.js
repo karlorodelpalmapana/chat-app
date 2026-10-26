@@ -200,7 +200,7 @@ function showMessage(msg) {
     
           const { error } = await sb
             .from("messages")
-            .update({ content: "⚠️ This message was unsent." })
+            .update({ content: "This message was unsent." })
             .eq("id", msg.id);
 
           if (error) alert("Could not unsend: " + error.message);
